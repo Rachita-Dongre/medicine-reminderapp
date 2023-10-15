@@ -17,17 +17,40 @@ class Medicine {
 
   Map<String, dynamic> toMap() {
     return {
-      'name': medicineName,
-      'dosageAmount': dosageAmount,
-      'doseTimes': doseTimes.map(TimeOfDayUtils.serializeTimeOfDay).toList(),
+      'medicine_name': medicineName,
+      'dosage_amount': dosageAmount,
+      'dose_times': doseTimes.map(TimeOfDayUtils.serializeTimeOfDay).toList(),
     };
   }
 
+  // static Medicine fromMap(Map<String, dynamic> map) {
+  //   return Medicine(
+  //     medicineName: map['medicine_name'],
+  //     dosageAmount: map['dosage_amount'],
+  //     doseTimes: (map['dose_times'] as List)
+  //         .map((e) => TimeOfDayUtils.deserializeTimeOfDay(e))
+  //         .toList(),
+  //   );
+  // }
+
+  // static Medicine fromMap(Map<String, dynamic> map) {
+  //   List<String> doseTimeStrings = map['doseTimes'].split(",");
+  //   return Medicine(
+  //     medicineName: map['medicine_name'],
+  //     dosageAmount: map['dosage_amount'],
+  //     doseTimes: doseTimeStrings
+  //         .map((e) => TimeOfDayUtils.deserializeTimeOfDay(e))
+  //         .toList(),
+  //   );
+  // }
+
   static Medicine fromMap(Map<String, dynamic> map) {
+    List<String> doseTimeStrings =
+        (map['dose_times'] as String?)?.split(",") ?? [];
     return Medicine(
-      medicineName: map['name'],
-      dosageAmount: map['dosageAmount'],
-      doseTimes: (map['doseTimes'] as List)
+      medicineName: map['medicine_name'],
+      dosageAmount: map['dosage_amount'],
+      doseTimes: doseTimeStrings
           .map((e) => TimeOfDayUtils.deserializeTimeOfDay(e))
           .toList(),
     );

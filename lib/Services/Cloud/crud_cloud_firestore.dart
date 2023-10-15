@@ -17,6 +17,7 @@ class Database {
       ?.uid; //current user's user id, that's auto-generated during authentication
 
   //Create
+
   static Future<void> addMedicine({
     required String medicineName,
     required String dosageAmount,

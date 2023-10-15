@@ -44,12 +44,14 @@ class DatabaseHelper {
 
   // For inserting new medicine into the database
   // create
+
   Future<int> insertMedicine({
     required String id,
     required String medicineName,
     required String dosageAmount,
     required List<TimeOfDay> doseTimes,
   }) async {
+    print('inside insertmedicine (sqlite)');
     Database db = await instance.database;
     Map<String, dynamic> row = {
       'id': id,
@@ -57,6 +59,7 @@ class DatabaseHelper {
       'dosage_amount': dosageAmount,
       'dose_times': doseTimes.map(TimeOfDayUtils.serializeTimeOfDay).join(","),
     };
+    print("reached just before end of insertMedicine");
     return await db.insert('medicine', row);
   }
 
@@ -67,6 +70,7 @@ class DatabaseHelper {
 
   // For retrieving all medicines
   //read
+
   Future<List<Medicine>> queryAllMedicines() async {
     Database db = await instance.database;
     List<Map> maps = await db.query('medicine');
@@ -98,7 +102,9 @@ class DatabaseHelper {
   // }
 
   //delete
+
   Future<int> deleteMedicine(String id) async {
+    print("inside deleteMedicine sqlite");
     Database db = await instance.database;
     return await db.delete(
       'medicine',
@@ -109,11 +115,23 @@ class DatabaseHelper {
 
   Future<Medicine?> getMedicineById(String medicineId) async {
     Database db = await instance.database;
-    List<Map<String, dynamic>> result = await db
-        .query('medicine', where: 'medicine_name = ?', whereArgs: [medicineId]);
+
+    List<Map<String, dynamic>> result =
+        await db.query('medicine', where: 'id = ?', whereArgs: [medicineId]);
+
     if (result.isNotEmpty) {
       return Medicine.fromMap(result.first);
     }
     return null;
   }
+
+  // Future<Medicine?> getMedicineById(String medicineId) async {
+  //   Database db = await instance.database;
+  //   List<Map<String, dynamic>> result = await db
+  //       .query('medicine', where: 'medicine_name = ?', whereArgs: [medicineId]);
+  //   if (result.isNotEmpty) {
+  //     return Medicine.fromMap(result.first);
+  //   }
+  //   return null;
+  //}
 }

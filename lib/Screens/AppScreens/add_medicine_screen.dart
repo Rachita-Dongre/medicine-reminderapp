@@ -112,8 +112,13 @@ class _AddMedicineState extends State<AddMedicine> {
   Future<void> onAddPressed() async {
     String medicineId = uuid.v4();
 
-    callSqliteDBhelper(medicineId);
-    callNotificationService(medicineId);
+    print("Calling sqlite DBhelper");
+    await callSqliteDBhelper(medicineId);
+
+    print("calling notification service");
+    await callNotificationService(medicineId);
+
+    print("calling addmedicine");
     await callAddMedicine(medicineId);
     //callStoreMedicineInSharedPreferences();
 
@@ -127,7 +132,8 @@ class _AddMedicineState extends State<AddMedicine> {
 
   late List<TimeOfDay> timeListForSqlite;
 
-  void callSqliteDBhelper(String id) async {
+  Future<void> callSqliteDBhelper(String id) async {
+    print("inside callSqliteDBhelper");
     timeListForSqlite = nullToNonNullTime(doseTimes);
     await DatabaseHelper.instance.insertMedicine(
       id: id,
@@ -135,21 +141,26 @@ class _AddMedicineState extends State<AddMedicine> {
       dosageAmount: dosageAmountController.text,
       doseTimes: timeListForSqlite,
     );
+    print("reached end of SqliteDBhelper");
   }
 
-  void callNotificationService(String medicineId) {
+  Future<void> callNotificationService(String medicineId) async {
+    print("inside callNotificationService");
     try {
       notificationServices.notificationsHelper(
           medicineId, medicineNameController.text);
     } catch (e) {
+      print("Error in callNotificationService: $e");
       showErrorDialog(
         context,
         'Could not schedule notification. Try Again!',
       );
     }
+    print("reached end of callNotificationService");
   }
 
   Future<void> callAddMedicine(String uuid) async {
+    print("inside callAddmedicine");
     try {
       await Database.addMedicine(
         medicineName: medicineNameController.text,
@@ -173,6 +184,7 @@ class _AddMedicineState extends State<AddMedicine> {
         'Could not add medicine. Try Again!',
       );
     }
+    print("reached end of callAddMedicine");
   }
 
   // List<TimeOfDay> nullToNonNullTime(List<TimeOfDay?> timeList) {

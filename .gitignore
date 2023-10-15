@@ -12,9 +12,9 @@ migrate_working_dir/
 
 # ignored files
 lib/firebase_options.dart
-lib/android/app/google-services.json
-lib/ios/firebase_app_id_file.json
-lib/ios/Runner/GoogleService-Info.plist
+android/app/google-services.json
+ios/firebase_app_id_file.json
+ios/Runner/GoogleService-Info.plist
 
 # IntelliJ related
 *.iml

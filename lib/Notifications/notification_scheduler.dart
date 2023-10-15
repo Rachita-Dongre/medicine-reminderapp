@@ -10,13 +10,15 @@ class NotificationServices {
       FlutterLocalNotificationsPlugin();
 
   final AndroidInitializationSettings _androidInitializationSettings =
-      const AndroidInitializationSettings('launcher_icon');
+      const AndroidInitializationSettings('@drawable/launcher_icon');
 
   void initializeNotifications() async {
     InitializationSettings initializationSettings = InitializationSettings(
       android: _androidInitializationSettings,
     );
+    print("before notifications plugin initialization");
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    print("notifications plugin initialized");
   }
 
   /*-------------- initializations - end - here -------------- */
@@ -38,6 +40,15 @@ class NotificationServices {
 
   //UTILITY FUNCTION to convert the time from DateTime format to TZDateTime format.
   tz.TZDateTime convertToTZDateTime(DateTime dateTime) {
+    // Convert DateTime to local first if it's in UTC
+    if (dateTime.isUtc) {
+      dateTime = dateTime.toLocal();
+    }
+    print("current system time");
+    print(tz.TZDateTime.now(tz.local));
+    // Offset to adjust the DateTime to the local timezone
+    // final offset = dateTime.timeZoneOffset;
+    // dateTime = dateTime.add(offset);
     return tz.TZDateTime.from(dateTime, tz.local);
   }
 
@@ -59,56 +70,11 @@ class NotificationServices {
 
   Future<void> notificationsHelper(
       String sqliteMedicineId, String medicineName) async {
-    // CollectionReference userMedicines = FirebaseFirestore.instance
-    //     .collection('Medicines')
-    //     .doc(userId)
-    //     .collection('User-Medicines');
-
-    // QuerySnapshot medicinesSnapshot = await userMedicines
-    //     .get(); //getting all medicines for a particular user.
-
-    // for (QueryDocumentSnapshot medicineDocument in medicinesSnapshot.docs) {
-    //   var medicineData = medicineDocument.data() as Map<String, dynamic>;
-    //   List<Map<String, dynamic>?> doseTimesList = List<
-    //       Map<String,
-    //           dynamic>?>.from(medicineData[
-    //       'Date and Time']); //collecting all doseTimes from the user's medicine data and storing in a list
-    //   List<DateTime> validDoseTimes =
-    //       []; //making a list for doseTimes in DateTime format to pass in scheduleNotification function
-
-    //   for (Map<String, dynamic>? doseTimeMap in doseTimesList) {
-    //     if (doseTimeMap != null) {
-    //       //converting doseTime from map to DateTime and storing in vaidDoseTimes list
-    //       DateTime doseDateTime = convertMapToDateTime(doseTimeMap);
-    //       validDoseTimes.add(doseDateTime);
-    //     }
-    //   }
-    //   print('Extracted Valid dose times now printing them');
-    //   for (var dosetime in validDoseTimes) {
-    //     print(dosetime);
-    //   }
-    //   print('Number of Doses: ${validDoseTimes.length}');
-
-    //   // Extracting medicine details
-    //   String medicineName = medicineData['Medicine Name'];
-    //   print(
-    //       'Medicine name from which notification is scheduled : $medicineName');
-    //   String dosageAmount = medicineData['Dosage Amount'];
-    //   print('dosage amount of the medicine : $dosageAmount');
-
-    //   print('now calling scheduleNotification function');
-
-    //   // Scheduling the notification
-    //   // Using the user's uid to be used to make notification's unique identifier
-    //   scheduleNotification(
-    //       userId, // Passing the user's ID here
-    //       medicineName,
-    //       dosageAmount,
-    //       validDoseTimes);
-    // }
+    print("reached inside of notificationsHelper");
 
     Medicine? medicine =
         await DatabaseHelper.instance.getMedicineById(sqliteMedicineId);
+    print("got medicine details from sqlite");
 
     if (medicine != null) {
       List<TimeOfDay> doseTimesList = medicine.doseTimes;
@@ -116,7 +82,7 @@ class NotificationServices {
 
       for (TimeOfDay time in doseTimesList) {
         // Convert TimeOfDay to DateTime
-        DateTime now = DateTime.now();
+        DateTime now = DateTime.now(); //.toLocal()
         DateTime doseDateTime =
             DateTime(now.year, now.month, now.day, time.hour, time.minute);
         validDoseTimes.add(doseDateTime);
@@ -133,7 +99,7 @@ class NotificationServices {
       print('dosage amount of the medicine : ${medicine.dosageAmount}');
 
       print('now calling scheduleNotification function');
-      // Schedule the notification using the user's uuid to be used to make notification's unique identifier
+      //Schedule the notification using the user's uuid to be used to make notification's unique identifier
       scheduleNotification(
         sqliteMedicineId,
         medicineName,
@@ -144,7 +110,7 @@ class NotificationServices {
   }
 
   void scheduleNotification(String id, String medicineName, String dosageAmount,
-      List<DateTime> doseTimes) {
+      List<DateTime> doseTimes) async {
     print('reached inside scheduleNotification');
     // String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
     // String uniqueString = id + timestamp;
@@ -154,7 +120,7 @@ class NotificationServices {
       android: AndroidNotificationDetails(
         'channel_id',
         'channel_name',
-        importance: Importance.high,
+        importance: Importance.max,
         priority: Priority.high,
         ticker: 'Take medicine',
         icon: 'launcher_icon',
@@ -162,6 +128,9 @@ class NotificationServices {
         styleInformation: BigTextStyleInformation(''),
       ),
     );
+    // await _flutterLocalNotificationsPlugin.show(
+    //     0, 'Test Title', 'Test body', notificationDetails);
+
     for (var doseIndex = 0; doseIndex < doseTimes.length; doseIndex++) {
       var doseTime = doseTimes[
           doseIndex]; //getting the dosetime in the list for processing

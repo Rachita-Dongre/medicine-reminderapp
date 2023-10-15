@@ -27,7 +27,7 @@ Future<bool> deleteConfirmationDialogue(BuildContext context, docID, sqliteId) {
             onPressed: () async {
               try {
                 notificationServices.cancelNotification(sqliteId);
-                DatabaseHelper.instance.deleteMedicine(sqliteId);
+                await DatabaseHelper.instance.deleteMedicine(sqliteId);
                 await Database.deleteMedicine(docID: docID);
               } on CouldNotDeleteMedicineException {
                 showErrorDialog(
