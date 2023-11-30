@@ -114,7 +114,7 @@ class NotificationServices {
     print('reached inside scheduleNotification');
     // String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
     // String uniqueString = id + timestamp;
-    int baseId = id.hashCode;
+    int baseId = id.hashCode & 0x7FFFFFFF; // Use only positive integers;
 
     NotificationDetails notificationDetails = const NotificationDetails(
       android: AndroidNotificationDetails(
